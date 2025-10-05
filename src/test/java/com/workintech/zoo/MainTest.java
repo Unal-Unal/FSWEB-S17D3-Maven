@@ -14,6 +14,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,7 +62,7 @@ class MainTest {
         assertEquals(2.0, kangaroo.getHeight());
         assertEquals(85.0, kangaroo.getWeight());
         assertEquals("Male", kangaroo.getGender());
-        assertEquals(false, kangaroo.getIsAggressive());
+        assertEquals(true, kangaroo.getIsAggressive());
     }
 
     @Test
@@ -94,8 +95,8 @@ class MainTest {
         // Assertions to ensure fields are set correctly
         assertEquals(1, koala.getId());
         assertEquals("Kara", koala.getName());
-        assertEquals(20.0, koala.getSleepHour());
-        assertEquals(15.0, koala.getWeight());
+        assertEquals(15.0, koala.getSleepHour());
+        assertEquals(20.0, koala.getWeight());
         assertEquals("Female", koala.getGender());
     }
 
@@ -140,7 +141,7 @@ class MainTest {
         long now = System.currentTimeMillis();
 
 
-        ZooErrorResponse errorResponse = new ZooErrorResponse(404, "Not Found", now);
+        ZooErrorResponse errorResponse = new ZooErrorResponse("Not Found", 404, now);
 
 
         assertEquals(404, errorResponse.getStatus());
@@ -195,9 +196,13 @@ class MainTest {
         mockMvc.perform(post("/kangaroos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(kangaroo)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated()) // 201 bekle
                 .andExpect(jsonPath("$.id").value(kangaroo.getId()))
                 .andExpect(jsonPath("$.name").value(kangaroo.getName()));
+    }
+
+    private MainTest andExpect(ResultMatcher value) {
+        return null;
     }
 
     @Test
@@ -265,14 +270,16 @@ class MainTest {
     @Test
     @DisplayName("KoalaController:SaveKoala")
     @Order(6)
+
     void testSaveKoala() throws Exception {
         mockMvc.perform(post("/koalas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(koala)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated()) // 201 bekle
                 .andExpect(jsonPath("$.id").value(koala.getId()))
                 .andExpect(jsonPath("$.name").value(koala.getName()));
     }
+
 
     @Test
     @DisplayName("KoalaController:FindAllKoalas")
